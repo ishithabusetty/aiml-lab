@@ -18,5 +18,5 @@ func = eval(f"lambda x: {func_str}")  # Convert string to function
 func(0)  # Test the function with x = 0
 start = float(input("Enter the starting value (e.g., 0): "))
 max_x, max_val = hill_climbing(func, start)
-print(f"Maxima found at x = {max_x}")
-print(f"Maximum value = {max_val}")
+print("Maxima found at x", max_x)
+print("Maximum value =",max_val)
