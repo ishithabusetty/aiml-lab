@@ -1,42 +1,54 @@
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.metrics import silhouette_score
 
-# -----------------------------
-# Load Iris dataset from CSV
-# -----------------------------
+# -------------------------------
+# 1. Load dataset
+# -------------------------------
 df = pd.read_csv("Iris.csv")
 
 # Drop Id column
 df = df.drop(columns=["Id"])
 
-# Convert Species to binary (Setosa = 0, Others = 1)
-df["Species"] = (df["Species"] != "Iris-setosa").astype(int)
+# Split into X and y
+X = df.iloc[:, :-1].values   # features
+y = df.iloc[:, -1].values    # labels (not used)
 
-# -----------------------------
-# Select features
-# -----------------------------
-X = df[["SepalLengthCm", "SepalWidthCm"]].values
+# -------------------------------
+# 2. K-Means parameters
+# -------------------------------
 k = 3
-
-# -----------------------------
-# Initialize centroids randomly
-# -----------------------------
 centroids = X[np.random.choice(len(X), k, replace=False)]
 
-# -----------------------------
-# K-Means algorithm
-# -----------------------------
-for _ in range(50):
-    distances = np.linalg.norm(X[:, None] - centroids, axis=2)
-    labels = np.argmin(distances, axis=1)
+# -------------------------------
+# 3. K-Means algorithm
+# -------------------------------
+for _ in range(100):
 
+    labels = []
+
+    # Assign points to nearest centroid
+    for x in X:
+        distances = [np.linalg.norm(x - c) for c in centroids]
+        labels.append(np.argmin(distances))
+
+    labels = np.array(labels)
+
+    # Update centroids
     for i in range(k):
         centroids[i] = X[labels == i].mean(axis=0)
 
-# -----------------------------
-# Plot clusters
-# -----------------------------
+# -------------------------------
+# 4. Silhouette Score
+# -------------------------------
+score = silhouette_score(X, labels)
+print("Silhouette Score:", score)
+
+# -------------------------------
+# 5. Plot clusters (first 2 features)
+# -------------------------------
 colors = ['r', 'g', 'b']
 
 for i in range(k):
@@ -44,7 +56,7 @@ for i in range(k):
         X[labels == i, 0],
         X[labels == i, 1],
         c=colors[i],
-        label=f"Cluster {i+1}"
+        label=f'Cluster {i+1}'
     )
 
 plt.scatter(
@@ -52,12 +64,11 @@ plt.scatter(
     centroids[:, 1],
     c='black',
     marker='x',
-    s=100,
-    label="Centroids"
+    label='Centroids'
 )
 
 plt.xlabel("Sepal Length")
 plt.ylabel("Sepal Width")
-plt.title("K-Means Clustering on Iris Dataset")
+plt.title("K-Means with Silhouette Score")
 plt.legend()
 plt.show()
